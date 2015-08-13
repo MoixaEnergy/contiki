@@ -83,7 +83,7 @@ leds_blink(void)
   blink = ~leds;
   leds_toggle(blink);
 
-  clock_delay(400);
+  clock_delay(CLOCK_SECOND / 2);
 
   leds_toggle(blink);
 }
