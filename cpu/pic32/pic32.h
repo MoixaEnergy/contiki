@@ -67,34 +67,49 @@
  *  Main Clock       -> SYSCLK = (Crystal_Freq / FPLLIDIV) * FPLLMUL / FPLLODIV
  *  Peripheral Clock -> PBCLK  = SYSCLK / FPBDIV
  *
- *  SYSCLK = 80MHz, PBCLK = 40MHz
+ *  SYSCLK = 80MHz, PBCLK = 80MHz
 */
 
 #include <p32xxxx.h>
 
-#pragma config FNOSC     = PRIPLL            // Oscillator Selection
-#pragma config FPLLIDIV  = DIV_2             // PLL Input Divider (PIC32 Starter Kit: use divide by 2 only)
-#pragma config FPLLMUL   = MUL_20            // PLL Multiplier
-#pragma config FPLLODIV  = DIV_1             // PLL Output Divider
-#pragma config FPBDIV    = DIV_1             // Peripheral Clock divisor
-#pragma config FWDTEN    = OFF               // Watchdog Timer
-#pragma config WDTPS     = PS32768           // Watchdog Timer Postscale
-#pragma config FCKSM     = CSDCMD            // Clock Switching & Fail Safe Clock Monitor
-#pragma config OSCIOFNC  = OFF               // CLKO Enable
-#pragma config POSCMOD   = HS                // Primary Oscillator
-#pragma config IESO      = OFF               // Internal/External Switch-over
-#pragma config FSOSCEN   = OFF               // Secondary Oscillator Enable
-#pragma config CP        = OFF               // Code Protect
-#pragma config BWP       = OFF               // Boot Flash Write Protect
-#pragma config PWP       = OFF               // Program Flash Write Protect
-#pragma config ICESEL    = ICS_PGx2          // ICE/ICD Comm Channel Select
-#pragma config DEBUG     = OFF               // Debugger Disabled for Starter Kit
-#pragma config FSRSSEL   = PRIORITY_7
+#pragma config FNOSC    = PRIPLL       // Oscillator Selection
+#pragma config FPLLIDIV = DIV_2        // PLL Input Divider (PIC32 Starter Kit: use divide by 2 only)
+#pragma config FPLLMUL  = MUL_20       // PLL Multiplier
+#pragma config FPLLODIV = DIV_1        // PLL Output Divider
+#pragma config FPBDIV   = DIV_1        // Peripheral Clock divisor
+#pragma config FWDTEN   = OFF          // Watchdog Timer
+#pragma config OSCIOFNC = OFF          // CLKO Enable
+#pragma config POSCMOD  = HS           // Primary Oscillator
+#pragma config FSOSCEN  = OFF          // Secondary Oscillator Enable (KLO was off)
+#pragma config CP       = OFF          // Code Protect
+#pragma config BWP      = OFF          // Boot Flash Write Protect
+#pragma config PWP      = OFF          // Program Flash Write Protect
+#pragma config ICESEL   = ICS_PGx2     // ICE/ICD Comm Channel Select
 
-/* external PHY in RMII/default configuration */
-
-// #pragma config FMIIEN    = OFF
-// #pragma config FETHIO    = ON
+#if CONTIKI_TARGET_MASLOW
+  #ifdef USB_A0_SILICON_WORK_AROUND
+    #pragma config UPLLEN   = OFF       // USB PLL Enabled (A0 bit inverted)
+  #else
+    #pragma config UPLLEN   = ON        // USB PLL Enabled
+  #endif
+  #pragma config WDTPS     = PS65536    // Watchdog Timer Postscale
+  #pragma config FCKSM     = CSECME     // Clock Switching & Fail Safe Clock Monitor
+  #pragma config IESO      = ON         // Internal/External Switch-over
+  #pragma config DEBUG     = ON         // Background Debugger Enable
+  #pragma config FUSBIDIO  = OFF        // use as IO
+  #pragma config FVBUSONIO = OFF        // use as IO
+#elif CONTIKI_TARGET_SEEDEYE
+  #pragma config WDTPS     = PS32768    // Watchdog Timer Postscale
+  #pragma config FCKSM     = CSDCMD     // Clock Switching & Fail Safe Clock Monitor
+  #pragma config IESO      = OFF        // Internal/External Switch-over
+  #pragma config DEBUG     = OFF        // Debugger Disabled for Starter Kit
+  #pragma config FSRSSEL   = PRIORITY_7
+  /* external PHY in RMII/default configuration */
+  #pragma config FMIIEN    = OFF
+  #pragma config FETHIO    = ON
+#else
+  #error __FILE__: No suitable platform chosen
+#endif // CONTIKI_TARGET_MASLOW
 
 void pic32_init(void);
 
