@@ -51,9 +51,10 @@
 #include <contiki.h>
 #include <clock.h>
 #include <lib/random.h>
-#include <dev/leds.h>
 //#include "dev/button-sensor.h"
 //#include "dev/battery-sensor.h"
+#include "dev/leds-arch.h"
+#include "dev/leds.h"
 #include <dev/watchdog.h>
 
 #include <pic32.h>
@@ -66,95 +67,88 @@
 
 #define DEBUG 1
 #if DEBUG
-#include <stdio.h>
-#define PRINTF(...) printf(__VA_ARGS__)
+  #include <stdio.h>
+  #define PRINTF(...) printf(__VA_ARGS__)
 #else
-#define PRINTF(...)
+  #define PRINTF(...)
 #endif
 
 //SENSORS(&button_sensor);
 
 /*---------------------------------------------------------------------------*/
-/*
 static void
 print_processes(struct process *const processes[])
 {
-  PRINTF("Starting:\n");
+	PRINTF("Starting:\n");
 
-  while(*processes != NULL) {
-    PRINTF(" '%s'\n", (*processes)->name);
-    processes++;
-  }
+	while (*processes != NULL) {
+		PRINTF(" '%s'\n", (*processes)->name);
+		processes++;
+	}
 
-  PRINTF("\n");
+	PRINTF("\n");
 }
-*/
 
 /*---------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
 {
-  int32_t r;
+	int32_t r;
 
-  /* Initalizing main hardware */
-  pic32_init();
-  watchdog_init();
-  leds_init();
-  clock_init();
+	pic32_init();
+	watchdog_init();
+	leds_init();
+	leds_progress_init();
 
-//  dbg_setup_uart(UART_DEBUG_BAUDRATE);
+	clock_init();
 
-//  PRINTF("CPU Clock: %uMhz\n", pic32_clock_get_system_clock() / 1000000);
-//  PRINTF("Peripheral Clock: %uMhz\n", pic32_clock_get_peripheral_clock() / 1000000);
+//	dbg_setup_uart(UART_DEBUG_BAUDRATE);
 
-//  random_init(4321);
-  process_init();
-  process_start(&etimer_process, NULL);
-  ctimer_init();
-  rtimer_init();
+//	PRINTF("CPU Clock: %uMhz\n", pic32_clock_get_system_clock() / 1000000);
+//	PRINTF("Peripheral Clock: %uMhz\n", pic32_clock_get_peripheral_clock() / 1000000);
 
-  energest_init();
-  ENERGEST_ON(ENERGEST_TYPE_CPU);
+//	random_init(4321);
+	process_init();
+	process_start(&etimer_process, NULL);
+	ctimer_init();
+	rtimer_init();
+	asm volatile("ei");  // enable interrupts
 
-//  process_start(&sensors_process, NULL);
-//  SENSORS_ACTIVATE(battery_sensor);
+//	process_start(&sensors_process, NULL);
+//	SENSORS_ACTIVATE(battery_sensor);
 
-  leds_on(LEDS_RED);
+	leds_on(LEDS_ALL);
+//	leds_progress_set(4);
 
-  /* Starting autostarting process */
-//  print_processes(autostart_processes);
-  autostart_start(autostart_processes);
+	/* Starting autostarting process */
+//	print_processes(autostart_processes);
+	autostart_start(autostart_processes);
 
-//  PRINTF("Processes running\n");
+//	PRINTF("Processes running\n");
 
-  leds_off(LEDS_ALL);
+	leds_off(LEDS_ALL);
 
-  watchdog_start();
+	watchdog_start();
 
-  /*
-   * This is the scheduler loop.
-   */
-  while(1) {
+	/*
+	 * This is the scheduler loop.
+	 */
+	while (1) {
 
-    do {
-      /* Reset watchdog. */
-      watchdog_periodic();
-      r = process_run();
-    } while(r > 0);
+		do {
+			/* Reset watchdog. */
+			watchdog_periodic();
+			r = process_run();
+		} while (r > 0);
 
-    ENERGEST_OFF(ENERGEST_TYPE_CPU);
-    ENERGEST_ON(ENERGEST_TYPE_LPM);
+		watchdog_stop();
+		/* low-power mode start */
+		asm volatile("wait");
+		/* low-power mode end */
+		watchdog_start();
+	}
 
-    watchdog_stop();
-    asm volatile("wait");
-    watchdog_start();
-
-    ENERGEST_OFF(ENERGEST_TYPE_LPM);
-    ENERGEST_ON(ENERGEST_TYPE_CPU);
-
-  }
-
-  return 0;
+	return 0;
 }
 /*---------------------------------------------------------------------------*/
 

@@ -56,6 +56,8 @@ typedef uint16_t uip_stats_t;
 typedef uint32_t clock_time_t;
 typedef uint32_t rtimer_clock_t;
 
+#define BIT(n)  (1 << n)
+
 #define RTIMER_CLOCK_LT(a,b) ((int32_t)((a)-(b)) < 0)
 
 #define PROFILE_CONF_ON 0

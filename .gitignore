@@ -92,3 +92,5 @@ contiki-cc2530dk.lib
 # rl78 build artifacts
 *.eval-adf7xxxmb4z
 *.eval-adf7xxxmb4z.srec
+/examples/maslow/test-leds/test-leds.X/nbproject/private/
+/examples/maslow/test-leds/test-leds-elf.X/nbproject/private/

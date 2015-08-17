@@ -70,11 +70,6 @@ clock_callback(void)
     etimer_request_poll();
   }
 
-#if (CLOCK_CONF_SECOND & (CLOCK_CONF_SECOND - 1)) != 0
-#error CLOCK_CONF_SECOND must be a power of two (i.e., 1, 2, 4, 8, 16, 32, 64, ...).
-#error Change CLOCK_CONF_SECOND in contiki-conf.h.
-#endif
-
   if((ticks % CLOCK_SECOND) == 0) {
     ++seconds;
   }

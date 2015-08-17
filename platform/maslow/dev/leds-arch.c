@@ -45,156 +45,39 @@
  */
 
 #include "contiki-conf.h"
-
-#include "dev/leds.h"
+#include "leds-arch.h"
 
 #include "p32xxxx.h"
-
-/* PORT E */
-#define LEDS_SCHM_1                     (1 << 0)
-#define LEDS_SCHM_2                     (1 << 1)
-#define LEDS_SCHM_3                     (1 << 2)
-#define LEDS_SCHM_4                     (1 << 3)
-#define LEDS_SCHM_5                     (1 << 4)
-#define LEDS_SCHM_6                     (1 << 5)
-#define LEDS_SCHM_7                     (1 << 6)
-#define LEDS_SCHM_8                     (1 << 7)
-/* PORT C */
-#define LEDS_SCHM_9                     (1 << 1)
-#define LEDS_SCHM_10                    (1 << 2)
-
-#define pp_concat3(a,b,c)               a ## b ## c
-
-#define led_1_on                        (LATECLR = LEDS_SCHM_1)
-#define led_1_off                       (LATESET = LEDS_SCHM_1)
-#define led_1_toggle                    (LATEINV = LEDS_SCHM_1)
-#define led_2_on                        (LATESET = LEDS_SCHM_2)
-#define led_2_off                       (LATECLR = LEDS_SCHM_2)
-#define led_2_toggle                    (LATEINV = LEDS_SCHM_2)
-#define led_3_on                        (LATESET = LEDS_SCHM_3)
-#define led_3_off                       (LATECLR = LEDS_SCHM_3)
-#define led_3_toggle                    (LATEINV = LEDS_SCHM_3)
-#define led_4_on                        (LATESET = LEDS_SCHM_4)
-#define led_4_off                       (LATECLR = LEDS_SCHM_4)
-#define led_4_toggle                    (LATEINV = LEDS_SCHM_4)
-#define led_5_on                        (LATESET = LEDS_SCHM_5)
-#define led_5_off                       (LATECLR = LEDS_SCHM_5)
-#define led_5_toggle                    (LATEINV = LEDS_SCHM_5)
-#define led_6_on                        (LATESET = LEDS_SCHM_6)
-#define led_6_off                       (LATECLR = LEDS_SCHM_6)
-#define led_6_toggle                    (LATEINV = LEDS_SCHM_6)
-#define led_7_on                        (LATESET = LEDS_SCHM_7)
-#define led_7_off                       (LATECLR = LEDS_SCHM_7)
-#define led_7_toggle                    (LATEINV = LEDS_SCHM_7)
-#define led_8_on                        (LATESET = LEDS_SCHM_8)
-#define led_8_off                       (LATECLR = LEDS_SCHM_8)
-#define led_8_toggle                    (LATEINV = LEDS_SCHM_8)
-#define led_9_on                        (LATCSET = LEDS_SCHM_9)
-#define led_9_off                       (LATCCLR = LEDS_SCHM_9)
-#define led_9_toggle                    (LATCINV = LEDS_SCHM_9)
-#define led_10_on                       (LATCSET = LEDS_SCHM_10)
-#define led_10_off                      (LATCCLR = LEDS_SCHM_10)
-#define led_10_toggle                   (LATCINV = LEDS_SCHM_10)
-#define led_on(n)                       pp_concat3(led_,n,_on)
-#define led_off(n)                      pp_concat3(led_,n,_off)
-#define led_toggle(n)                   pp_concat3(led_,n,_toggle)
 
 /*---------------------------------------------------------------------------*/
 void
 leds_arch_init(void)
 {
-	int i;
-
-	TRISECLR =
-		LEDS_SCHM_1 | LEDS_SCHM_2 | LEDS_SCHM_3 | LEDS_SCHM_4 |
-		LEDS_SCHM_5 | LEDS_SCHM_6 | LEDS_SCHM_7 | LEDS_SCHM_8;
-	TRISCCLR =
-		LEDS_SCHM_9 | LEDS_SCHM_10;
-
-	led_1_off; led_2_off; led_3_off; led_4_off; led_5_off;
-	led_6_off; led_7_off; led_8_off; led_9_off; led_10_off;
+	TRISECLR = BIT(0) | BIT(1) | BIT(2) | BIT(3) | BIT(4) | BIT(5);
+	LATESET  = BIT(0) | BIT(1) | BIT(2) | BIT(3) | BIT(4) | BIT(5);
 }
 /*---------------------------------------------------------------------------*/
-unsigned char
+uint8_t
 leds_arch_get(void)
 {
-	unsigned char progress_leds = 0;
-
-	if (PORTE & LEDS_SCHM_2) {
-		progress_leds = 1;
-		if (PORTE & LEDS_SCHM_3) {
-			progress_leds = 2;
-			if (PORTE & LEDS_SCHM_4) {
-				progress_leds = 3;
-				if (PORTE & LEDS_SCHM_5) {
-					progress_leds = 4;
-				}
-			}
-		}
-	}
 	return
-		(PORTE & LEDS_SCHM_1  ? 0 : (1 << 0)) |
-		(PORTE & LEDS_SCHM_6  ? 0 : (1 << 1)) |
-		(PORTE & LEDS_SCHM_7  ? 0 : (1 << 2)) |
-		(PORTE & LEDS_SCHM_8  ? 0 : (1 << 3)) |
-		(PORTC & LEDS_SCHM_9  ? 0 : (1 << 4)) |
-		(PORTC & LEDS_SCHM_10 ? 0 : (1 << 5)) |
-		(progress_leds << 6);
+		(PORTEbits.RE3 ? 0 : BIT(LedBypass))  |
+		(PORTEbits.RE1 ? 0 : BIT(LedPV))      |
+		(PORTEbits.RE0 ? 0 : BIT(LedMains))   |
+		(PORTEbits.RE2 ? 0 : BIT(LedBattery)) |
+		(PORTEbits.RE5 ? 0 : BIT(LedPower))   |
+		(PORTEbits.RE4 ? 0 : BIT(LedWiFi));
 }
 /*---------------------------------------------------------------------------*/
 void
-leds_arch_set(unsigned char leds)
+leds_arch_set(uint8_t leds)
 {
-	unsigned char progress_leds;
-
-	progress_leds = leds >> 6;
-	if (leds & LEDS_BATTERY) {
-		led_2_on;
-		if (progress_leds > 0) {
-			led_3_on;
-			if (progress_leds > 1) {
-				led_4_on;
-				if (progress_leds > 2)
-					led_5_on;
-				else
-					led_5_off;
-			}
-			else {
-				led_4_off; led_5_off;
-			}
-		}
-		else {
-			led_3_off; led_4_off; led_5_off;
-		}
-	}
-	else {
-		led_2_off; led_3_off; led_4_off; led_5_off;
-	}
-
-	if (leds & LEDS_BYPASS)
-		led_1_on;
-	else
-		led_1_off;
-	if (leds & LEDS_PV)
-		led_6_on;
-	else
-		led_6_off;
-	if (leds & LEDS_MAINS)
-		led_7_on;
-	else
-		led_7_off;
-	if (leds & LEDS_BATTERY)
-		led_8_on;
-	else
-		led_8_off;
-	if (leds & LEDS_POWER)
-		led_9_on;
-	else
-		led_9_off;
-	if (leds & LEDS_WIFI)
-		led_10_on;
-	else
-		led_10_off;
+	LATEbits.LATE3 = (leds & BIT(LedBypass))  ? 0 : 1;
+        LATEbits.LATE1 = (leds & BIT(LedPV))      ? 0 : 1;
+	LATEbits.LATE0 = (leds & BIT(LedMains))   ? 0 : 1;
+	LATEbits.LATE2 = (leds & BIT(LedBattery)) ? 0 : 1;
+	LATEbits.LATE5 = (leds & BIT(LedPower))   ? 0 : 1;
+	LATEbits.LATE4 = (leds & BIT(LedWiFi))    ? 0 : 1;
 }
 /*---------------------------------------------------------------------------*/
 

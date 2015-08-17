@@ -77,7 +77,7 @@
 #pragma config FPLLMUL  = MUL_20       // PLL Multiplier
 #pragma config FPLLODIV = DIV_1        // PLL Output Divider
 #pragma config FPBDIV   = DIV_1        // Peripheral Clock divisor
-#pragma config FWDTEN   = OFF          // Watchdog Timer
+#pragma config FWDTEN   = OFF          // Watchdog Timer can be enabled by software
 #pragma config OSCIOFNC = OFF          // CLKO Enable
 #pragma config POSCMOD  = HS           // Primary Oscillator
 #pragma config FSOSCEN  = OFF          // Secondary Oscillator Enable (KLO was off)
@@ -95,7 +95,7 @@
   #pragma config WDTPS     = PS65536    // Watchdog Timer Postscale
   #pragma config FCKSM     = CSECME     // Clock Switching & Fail Safe Clock Monitor
   #pragma config IESO      = ON         // Internal/External Switch-over
-  #pragma config DEBUG     = ON         // Background Debugger Enable
+  #pragma config DEBUG     = OFF        // 4-wire JTAG and Trace disabled
   #pragma config FUSBIDIO  = OFF        // use as IO
   #pragma config FVBUSONIO = OFF        // use as IO
 #elif CONTIKI_TARGET_SEEDEYE

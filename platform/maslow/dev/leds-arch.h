@@ -30,6 +30,13 @@
  * SUCH DAMAGE.
  *
  */
+
+/**
+ * \addtogroup Maslow platform
+ *
+ * @{
+ */
+
 /**
  * \file   -
  * \brief  -
@@ -37,16 +44,29 @@
  * \date   -
  */
 
-#ifndef PLATFORM_CONF_H_
-#define PLATFORM_CONF_H_
+#include "p32xxxx.h"
 
-#define UART_DEBUG_BAUDRATE                     115200
+/* These are 6 status LEDs (except for the battery progress LEDs from left to
+ * right on the Maslow panel. The Contiki core is limited to a maximum of 8 LEDs
+ * due to the byte-size bitmask state of all the LEDs. */
+typedef enum {
+	LedBypass,
+	LedPV,
+	LedMains,
+	LedBattery,
+	LedPower,
+	LedWiFi
+} Led;
 
-#define PLATFORM_HAS_BATTERY                    0
-#define PLATFORM_HAS_BUTTON                     0
-#define PLATFORM_HAS_LEDS                       1
-#define PLATFORM_HAS_RADIO                      0
+/* LED name mapping complying with Contiki naming convention */
+#define LEDS_CONF_RED     LedBypass
+#define LEDS_CONF_YELLOW  LedBattery
+#define LEDS_CONF_GREEN   LedPower
+#define LEDS_CONF_BLUE    LedWiFi
 
-#define CLOCK_CONF_SECOND                       10000   // 100 µs
+/* LEDs not including the progress bar elements */
+#define LEDS_CONF_ALL     0x3F
 
-#endif /* PLATFORM_CONF_H_ */
+/* Progress bar made of single LEDs */
+void leds_progress_init(void);
+void leds_progress_set(uint8_t progress);
