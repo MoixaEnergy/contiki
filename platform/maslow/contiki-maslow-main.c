@@ -55,6 +55,7 @@
 //#include "dev/battery-sensor.h"
 #include "dev/leds-arch.h"
 #include "dev/leds.h"
+#include "dev/buzzer.h"
 #include <dev/watchdog.h>
 
 #include <pic32.h>
@@ -99,6 +100,7 @@ main(int argc, char **argv)
 	watchdog_init();
 	leds_init();
 	leds_progress_init();
+	buzzer_init();
 
 	clock_init();
 

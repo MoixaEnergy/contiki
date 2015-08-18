@@ -52,6 +52,7 @@
 #include "sys/rtimer.h"
 #include "dev/leds-arch.h"
 #include "dev/leds.h"
+#include "dev/buzzer.h"
 #include <pic32_clock.h>
 
 #include <p32xxxx.h>
@@ -59,15 +60,16 @@
 
 PROCESS(leds_progress, "Progress LEDs");
 PROCESS(led_fader, "LED fader");
+PROCESS(buzzer, "PWM buzzer");
 
-AUTOSTART_PROCESSES(&leds_progress, &led_fader);
-
-static struct etimer timer;
-static uint8_t progress;
+AUTOSTART_PROCESSES(&leds_progress, &led_fader, &buzzer);
 
 /*
  * Progress LEDs
  */
+static struct etimer timer;
+static uint8_t progress;
+
 PROCESS_THREAD(leds_progress, ev, data)
 {
 	PROCESS_BEGIN();
@@ -91,19 +93,18 @@ struct fader {
 	uint8_t led;
 	struct etimer cycle_timer;
 	struct etimer on_timer;
-	clock_time_t cycle_time;
 	clock_time_t on_time;
 	int change_rate;
 };
 
 inline void
-init_fader(struct fader *f, uint8_t led, clock_time_t cycle_time)
+init_fader(struct fader *f, uint8_t led,
+	   clock_time_t cycle_time, int change_rate)
 {
 	f->led = led;
-	f->cycle_time = cycle_time;
-	f->change_rate = CLOCK_SECOND / 3000 ;
+	f->change_rate = change_rate;
 	f->on_time = 1;
-	etimer_set(&f->cycle_timer, f->cycle_time);
+	etimer_set(&f->cycle_timer, cycle_time);
 }
 
 
@@ -113,7 +114,7 @@ PROCESS_THREAD(led_fader, ev, data)
 
 	PROCESS_BEGIN();
 
-	init_fader(&red, BIT(LedBypass), CLOCK_SECOND / 100);
+	init_fader(&red, BIT(LedBypass), CLOCK_SECOND / 50, CLOCK_SECOND / 2000);
 
 	while (1) {
 		leds_on(red.led);
@@ -123,8 +124,9 @@ PROCESS_THREAD(led_fader, ev, data)
 		leds_off(red.led);
 
 		red.on_time += red.change_rate;
-		if ((red.change_rate >= 0 &&
-		     red.on_time >= red.cycle_time - red.change_rate) ||
+		if ((red.change_rate > 0 &&
+		     red.on_time >
+		     red.cycle_timer.timer.interval - red.change_rate) ||
 		    (red.change_rate < 0 &&
 		     red.on_time < -red.change_rate)) {
 			red.change_rate = -red.change_rate;
@@ -138,7 +140,53 @@ PROCESS_THREAD(led_fader, ev, data)
 }
 
 /*
- * Buzzer synth - TODO
+ * Buzzer synth
  */
+struct beep {
+	struct etimer cycle_timer;
+	struct etimer on_timer;
+	clock_time_t on_time;
+	int change_rate;
+};
+
+inline void
+init_beep(struct beep *f, clock_time_t cycle_time, int change_rate)
+{
+	f->change_rate = change_rate;
+	f->on_time = 1;
+	etimer_set(&f->cycle_timer, cycle_time);
+}
+
+
+PROCESS_THREAD(buzzer, ev, data)
+{
+	static struct beep b;
+
+	PROCESS_BEGIN();
+
+	init_beep(&b, CLOCK_SECOND / 1000, CLOCK_SECOND / 10000 /* 100 µs */);
+
+	while (1) {
+		buzzer_on();
+		etimer_set(&b.on_timer, b.on_time);
+
+		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&b.on_timer));
+		buzzer_off();
+
+		b.on_time += b.change_rate;
+		if ((b.change_rate > 0 &&
+		     b.on_time >=
+		     b.cycle_timer.timer.interval - b.change_rate) ||
+		    (b.change_rate < 0 &&
+		     b.on_time < -b.change_rate)) {
+			b.change_rate = -b.change_rate;
+		}
+
+		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&b.cycle_timer));
+		etimer_reset(&b.cycle_timer);
+	}
+
+	PROCESS_END();
+}
 
 /** @} */
