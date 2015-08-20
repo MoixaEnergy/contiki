@@ -49,4 +49,16 @@
 
 #define CLOCK_CONF_SECOND                       10000   // 100 µs
 
+/**
+ * Platform events
+ *
+ * \sa <process.h>
+ */
+typedef enum {
+	ButtonOverrideEvent = 0,
+	ButtonResetEvent,
+	ButtonModeEvent,
+	ButtonJoinEvent
+} MaslowEvent;
+
 #endif /* PLATFORM_CONF_H_ */

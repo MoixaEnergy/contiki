@@ -43,7 +43,6 @@
  * \date   -
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -91,8 +90,7 @@ PROCESS_THREAD(leds_progress, ev, data)
 /*
  * LED fader
  */
-struct fader {
-	uint8_t led;
+struct pwm {
 	struct etimer cycle_timer;
 	struct etimer on_timer;
 	clock_time_t on_time;
@@ -100,42 +98,46 @@ struct fader {
 };
 
 inline void
-init_fader(struct fader *f, uint8_t led,
-	   clock_time_t cycle_time, int change_rate)
+pwm_init(struct pwm* p, clock_time_t cycle_time, int change_rate)
 {
-	f->led = led;
-	f->change_rate = change_rate;
-	f->on_time = 1;
-	etimer_set(&f->cycle_timer, cycle_time);
+	p->change_rate = change_rate;
+	p->on_time = 1;
+	etimer_set(&p->cycle_timer, cycle_time);
 }
 
+inline void
+pwm_cycle(struct pwm* p)
+{
+	p->on_time += p->change_rate;
+	if ((p->change_rate > 0 &&
+	     p->on_time >
+	     p->cycle_timer.timer.interval - p->change_rate) ||
+	    (p->change_rate < 0 &&
+	     p->on_time < -p->change_rate)) {
+		p->change_rate = -p->change_rate;
+	}
+}
 
 PROCESS_THREAD(led_fader, ev, data)
 {
-	static struct fader red;
+	static struct pwm p;
 
 	PROCESS_BEGIN();
 
-	init_fader(&red, BIT(LedBypass), CLOCK_SECOND / 42, CLOCK_SECOND / 1050);
+	pwm_init(&p, CLOCK_SECOND / 42, CLOCK_SECOND / 1050);
 
 	while (1) {
-		leds_on(red.led);
-		etimer_set(&red.on_timer, red.on_time);
+		leds_on(BIT(LedBypass));
 
-		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&red.on_timer));
-		leds_off(red.led);
+		etimer_set(&p.on_timer, p.on_time);
+		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.on_timer));
 
-		red.on_time += red.change_rate;
-		if ((red.change_rate > 0 &&
-		     red.on_time >
-		     red.cycle_timer.timer.interval - red.change_rate) ||
-		    (red.change_rate < 0 &&
-		     red.on_time < -red.change_rate)) {
-			red.change_rate = -red.change_rate;
-		}
+		leds_off(BIT(LedBypass));
 
-		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&red.cycle_timer));
-		etimer_reset(&red.cycle_timer);
+		pwm_cycle(&p);
+
+		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.cycle_timer));
+		etimer_reset(&p.cycle_timer);
 	}
 
 	PROCESS_END();
@@ -144,48 +146,26 @@ PROCESS_THREAD(led_fader, ev, data)
 /*
  * Buzzer synth
  */
-struct beep {
-	struct etimer cycle_timer;
-	struct etimer on_timer;
-	clock_time_t on_time;
-	int change_rate;
-};
-
-inline void
-init_beep(struct beep *f, clock_time_t cycle_time, int change_rate)
-{
-	f->change_rate = change_rate;
-	f->on_time = 1;
-	etimer_set(&f->cycle_timer, cycle_time);
-}
-
-
 PROCESS_THREAD(buzzer, ev, data)
 {
-	static struct beep b;
+	static struct pwm p;
 
 	PROCESS_BEGIN();
 
-	init_beep(&b, CLOCK_SECOND / 1000, CLOCK_SECOND / 10000);
+	pwm_init(&p, CLOCK_SECOND / 1000, CLOCK_SECOND / 10000);
 
 	while (1) {
 		buzzer_on();
-		etimer_set(&b.on_timer, b.on_time);
 
-		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&b.on_timer));
+		etimer_set(&p.on_timer, p.on_time);
+		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.on_timer));
+
 		buzzer_off();
 
-		b.on_time += b.change_rate;
-		if ((b.change_rate > 0 &&
-		     b.on_time >=
-		     b.cycle_timer.timer.interval - b.change_rate) ||
-		    (b.change_rate < 0 &&
-		     b.on_time < -b.change_rate)) {
-			b.change_rate = -b.change_rate;
-		}
+		pwm_cycle(&p);
 
-		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&b.cycle_timer));
-		etimer_reset(&b.cycle_timer);
+		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.cycle_timer));
+		etimer_reset(&p.cycle_timer);
 	}
 
 	PROCESS_END();
@@ -197,12 +177,22 @@ PROCESS_THREAD(button_handler, ev, data)
 
 	while (1) {
 		PROCESS_WAIT_EVENT();
-		if      (ev == buttonJoinEvent)
-			leds_toggle(BIT(LedWiFi));
-		else if (ev == buttonFuseEvent)
-			leds_toggle(BIT(LedPower));
-		else if (ev == buttonModeEvent)
+		switch (ev) {
+		case ButtonOverrideEvent:
 			leds_toggle(BIT(LedPV));
+			break;
+		case ButtonResetEvent:
+			leds_toggle(BIT(LedMains));
+			break;
+		case ButtonModeEvent:
+			leds_toggle(BIT(LedPower));
+			break;
+		case ButtonJoinEvent:
+			leds_toggle(BIT(LedWiFi));
+			break;
+		default:
+			break;
+		}
 	}
 
 	PROCESS_END();

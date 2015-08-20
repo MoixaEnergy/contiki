@@ -50,11 +50,6 @@
 
 extern const struct sensors_sensor button_sensor;
 
-extern process_event_t buttonJoinEvent;
-extern process_event_t buttonFuseEvent;
-extern process_event_t buttonModeEvent;
-extern process_event_t buttonOverrideEvent;
-
 #define BUTTON_SENSOR "Button"
 
 #endif /* BUTTON_SENSOR_H_ */

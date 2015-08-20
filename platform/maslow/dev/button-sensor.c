@@ -50,23 +50,24 @@
 
 #include <pic32_irq.h>
 
-#define BUTTON_POLL_PERIOD  (CLOCK_SECOND / 3)
+#define BUTTON_POLL_PERIOD  (CLOCK_SECOND / 5)
+#define BUTTON_RESET_DELAY  (CLOCK_SECOND * 8)
 
 typedef enum {
-	ButtonJoin = 0,
-	ButtonFuse,
+	ButtonOverride = 0,
+	ButtonReset,
 	ButtonMode,
-	ButtonOverride
+	ButtonJoin
 } Button;
 
 typedef union {
 	uint8_t all;
 
 	struct {
-		uint32_t join : 1;
-		uint32_t fuse : 1;
-		uint32_t mode : 1;
 		uint32_t override : 1;
+		uint32_t reset : 1;
+		uint32_t mode : 1;
+		uint32_t join : 1;
 		uint32_t bit4 : 1;
 		uint32_t bit5 : 1;
 		uint32_t bit6 : 1;
@@ -76,67 +77,79 @@ typedef union {
 
 static ButtonState buttonState;
 static struct ctimer pollTimer;
-
-process_event_t buttonJoinEvent;
-process_event_t buttonFuseEvent;
-process_event_t buttonModeEvent;
-process_event_t buttonOverrideEvent;
+static struct ctimer resetTimer;
 
 /*
-static int
-value(int type)
-{
-	switch (type) {
-	case ButtonMode:
-		return PORTGbits.RG13;
-	default:
-		break;
-	}
-	return -1;
-}
-*/
-/*---------------------------------------------------------------------------*/
+ * The override button is latching. A pointer to this variable is sent alongside
+ * a button transition event and determines whether this is an On or Off
+ * transiton.
+ */
+static uint32_t overrideLatch = 0;
+
+/*
+ * This function is called if and only if the reset button is depressed for
+ * BUTTON_RESET_DELAY seconds. Only then it broadcasts the reset message.
+ */
 static void
-poll(void *data)
+bcast_reset(void* data)
+{
+	process_post(PROCESS_BROADCAST, ButtonResetEvent, NULL);
+}
+
+/*
+ * Self-restarting poll timer callback function.
+ */
+static void
+poll(void* data)
 {
 	uint32_t v;
 
-	v = PORTDbits.RD8;
-	if (v != buttonState.join) {
-		buttonState.join = v;
-		if (v)
-			process_post(PROCESS_BROADCAST, buttonJoinEvent, NULL);
-		/*
-		 * Also possible but not informative enough:
-                 * sensors_changed(&button_sensor);
-		 */
+	v = PORTDbits.RD11;
+	if (v != buttonState.override) {
+		buttonState.override = overrideLatch = v;
+		process_post(PROCESS_BROADCAST,
+			     ButtonOverrideEvent, &overrideLatch);
+
+		// Also possible but not informative enough:
+                // sensors_changed(&button_sensor);
 	}
 	v = PORTGbits.RG12;
-	if (v != buttonState.fuse) {
-		buttonState.fuse = v;
+	if (v != buttonState.reset) {
+		buttonState.reset = v;
 		if (v)
-			process_post(PROCESS_BROADCAST, buttonFuseEvent, NULL);
+			ctimer_set(&resetTimer, BUTTON_RESET_DELAY,
+				   bcast_reset, NULL);
+		else
+			ctimer_stop(&resetTimer);
 	}
 	v = PORTGbits.RG13;
 	if (v != buttonState.mode) {
 		buttonState.mode = v;
 		if (v)
-			process_post(PROCESS_BROADCAST, buttonModeEvent, NULL);
+			process_post(PROCESS_BROADCAST, ButtonModeEvent, NULL);
+	}
+	v = PORTDbits.RD8;
+	if (v != buttonState.join) {
+		buttonState.join = v;
+		if (v)
+			process_post(PROCESS_BROADCAST, ButtonJoinEvent, NULL);
 	}
 	ctimer_reset(&pollTimer);
 }
-/*---------------------------------------------------------------------------*/
+
+/*
+ * Setup function that configures the necessary IO and initiates button polling.
+ */
 static int
 config(int type, int value)
 {
 	switch (type) {
 	case SENSORS_HW_INIT:
-		TRISDSET = BIT(8);
+		TRISDSET = BIT(8) | BIT(11);
 		TRISGSET = BIT(12) | BIT(13);
 		buttonState.all = 0;
 		return 1;
 	case SENSORS_ACTIVE:
-//		buttonState.mode = value(ButtonMode);
 		ctimer_set(&pollTimer, BUTTON_POLL_PERIOD, poll, NULL);
 		return 1;
 	default:
@@ -144,8 +157,7 @@ config(int type, int value)
 	}
 	return 0;
 }
-/*---------------------------------------------------------------------------*/
+
 SENSORS_SENSOR(button_sensor, BUTTON_SENSOR, NULL, config, NULL);
-/*---------------------------------------------------------------------------*/
 
 /** @} */

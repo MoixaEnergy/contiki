@@ -5,9 +5,9 @@
 # $Id: Makefile.pic32,v 1.0 2012/12/03 09:00:00 evilaliv3 Exp $
 #
 
-PIC32_MODEL ?= 32MX795F512L
-TOOLCHAIN   ?= v1.31
-CFLAGS += -O1 -fno-strict-aliasing -G7 -Wall -I /opt/microchip/xc32/$(TOOLCHAIN)/pic32mx/include/ $(CONTIKI_PLAT_DEFS)
+PIC32_MODEL ?= 32MX575F512L
+TOOLCHAIN   ?= /opt/microchip/xc32/v1.40
+CFLAGS += -O1 -fno-strict-aliasing -G7 -Wall -I $(TOOLCHAIN)/pic32mx/include/ $(CONTIKI_PLAT_DEFS)
 CFLAGS += -ffunction-sections
 
 ### Define the CPU directory

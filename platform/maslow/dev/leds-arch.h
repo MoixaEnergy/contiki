@@ -50,12 +50,12 @@
  * right on the Maslow panel. The Contiki core is limited to a maximum of 8 LEDs
  * due to the byte-size bitmask state of all the LEDs. */
 typedef enum {
-	LedBypass,
-	LedPV,
-	LedMains,
-	LedBattery,
-	LedPower,
-	LedWiFi
+	LedBypass  = 0,
+	LedPV      = 1,
+	LedMains   = 2,
+	LedBattery = 3,
+	LedPower   = 4,
+	LedWiFi    = 5
 } Led;
 
 /* LED name mapping complying with Contiki naming convention */
