@@ -63,7 +63,7 @@ PROCESS(led_fader, "LED fader");
 PROCESS(buzzer, "PWM buzzer");
 PROCESS(button_handler, "Button handler");
 
-AUTOSTART_PROCESSES(&leds_progress, &led_fader, &buzzer, &button_handler);
+AUTOSTART_PROCESSES(&leds_progress, &led_fader, &button_handler);
 
 /*
  * Progress LEDs
@@ -162,10 +162,16 @@ PROCESS_THREAD(buzzer, ev, data)
 
 		buzzer_off();
 
+		if (ev == PROCESS_EVENT_EXIT)
+			break;
+
 		pwm_cycle(&p);
 
 		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.cycle_timer));
 		etimer_reset(&p.cycle_timer);
+
+		if (ev == PROCESS_EVENT_EXIT)
+			break;
 	}
 
 	PROCESS_END();
@@ -186,6 +192,10 @@ PROCESS_THREAD(button_handler, ev, data)
 			break;
 		case ButtonModeEvent:
 			leds_toggle(BIT(LedPower));
+			if (!process_is_running(&buzzer))
+				process_start(&buzzer, NULL);
+			else
+				process_exit(&buzzer);
 			break;
 		case ButtonJoinEvent:
 			leds_toggle(BIT(LedWiFi));
