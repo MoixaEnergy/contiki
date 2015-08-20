@@ -107,7 +107,7 @@ pic32_init(void)
   SYSKEY = 0x556699aa;
 
   /* Enable Sleep Mode */
-  OSCCONCLR = 1 << _OSCCON_SLPEN_POSITION;
+  OSCCONCLR = _OSCCON_SLPEN_MASK;
 
   SYSKEY = 0;
 

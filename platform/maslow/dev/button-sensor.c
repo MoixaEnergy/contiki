@@ -1,7 +1,7 @@
 /*
  * Maslow
  *
- * Copyright (c) 2012, Moixa Technology
+ * Copyright (c) 2015, Moixa Technology
  *
  * All rights reserved.
  *
@@ -32,11 +32,7 @@
  */
 
 /**
- * \addtogroup platform
- * @{ */
-
-/**
- * \defgroup Maslow platform
+ * \addtogroup -
  *
  * @{
  */
@@ -48,111 +44,108 @@
  * \date   -
  */
 
-#include <contiki.h>
-#include <clock.h>
-#include <lib/random.h>
-#include "dev/button-sensor.h"
-//#include "dev/battery-sensor.h"
-#include "dev/leds-arch.h"
-#include "dev/leds.h"
-#include "dev/buzzer.h"
-#include <dev/watchdog.h>
+#include <dev/button-sensor.h>
 
-#include <pic32.h>
-#include <pic32_clock.h>
+#include <p32xxxx.h>
 
-//#include <debug-uart.h>
+#include <pic32_irq.h>
 
-#include <stdio.h>
-#include <string.h>
+#define BUTTON_POLL_PERIOD  (CLOCK_SECOND / 3)
 
-#define DEBUG 1
-#if DEBUG
-  #include <stdio.h>
-  #define PRINTF(...) printf(__VA_ARGS__)
-#else
-  #define PRINTF(...)
-#endif
+typedef enum {
+	ButtonJoin = 0,
+	ButtonFuse,
+	ButtonMode,
+	ButtonOverride
+} Button;
 
-SENSORS(&button_sensor);
+typedef union {
+	uint8_t all;
 
+	struct {
+		uint32_t join : 1;
+		uint32_t fuse : 1;
+		uint32_t mode : 1;
+		uint32_t override : 1;
+		uint32_t bit4 : 1;
+		uint32_t bit5 : 1;
+		uint32_t bit6 : 1;
+		uint32_t bit7 : 1;
+	};
+} ButtonState;
+
+static ButtonState buttonState;
+static struct ctimer pollTimer;
+
+process_event_t buttonJoinEvent;
+process_event_t buttonFuseEvent;
+process_event_t buttonModeEvent;
+process_event_t buttonOverrideEvent;
+
+/*
+static int
+value(int type)
+{
+	switch (type) {
+	case ButtonMode:
+		return PORTGbits.RG13;
+	default:
+		break;
+	}
+	return -1;
+}
+*/
 /*---------------------------------------------------------------------------*/
 static void
-print_processes(struct process *const processes[])
+poll(void *data)
 {
-	PRINTF("Starting:\n");
+	uint32_t v;
 
-	while (*processes != NULL) {
-		PRINTF(" '%s'\n", (*processes)->name);
-		processes++;
+	v = PORTDbits.RD8;
+	if (v != buttonState.join) {
+		buttonState.join = v;
+		if (v)
+			process_post(PROCESS_BROADCAST, buttonJoinEvent, NULL);
+		/*
+		 * Also possible but not informative enough:
+                 * sensors_changed(&button_sensor);
+		 */
 	}
-
-	PRINTF("\n");
+	v = PORTGbits.RG12;
+	if (v != buttonState.fuse) {
+		buttonState.fuse = v;
+		if (v)
+			process_post(PROCESS_BROADCAST, buttonFuseEvent, NULL);
+	}
+	v = PORTGbits.RG13;
+	if (v != buttonState.mode) {
+		buttonState.mode = v;
+		if (v)
+			process_post(PROCESS_BROADCAST, buttonModeEvent, NULL);
+	}
+	ctimer_reset(&pollTimer);
 }
-
 /*---------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
+static int
+config(int type, int value)
 {
-	int32_t r;
-
-	pic32_init();
-	watchdog_init();
-	leds_init();
-	leds_progress_init();
-	buzzer_init();
-
-	clock_init();
-
-//	dbg_setup_uart(UART_DEBUG_BAUDRATE);
-
-//	PRINTF("CPU Clock: %uMhz\n", pic32_clock_get_system_clock() / 1000000);
-//	PRINTF("Peripheral Clock: %uMhz\n", pic32_clock_get_peripheral_clock() / 1000000);
-
-//	random_init(4321);
-	process_init();
-	process_start(&etimer_process, NULL);
-	ctimer_init();
-	rtimer_init();
-	asm volatile("ei");  // enable interrupts
-
-	process_start(&sensors_process, NULL);
-	SENSORS_ACTIVATE(button_sensor);
-
-	leds_on(LEDS_ALL);
-//	leds_progress_set(4);
-
-	/* Starting autostarting process */
-//	print_processes(autostart_processes);
-	autostart_start(autostart_processes);
-
-//	PRINTF("Processes running\n");
-
-	leds_off(LEDS_ALL);
-
-	watchdog_start();
-
-	/*
-	 * This is the scheduler loop.
-	 */
-	while (1) {
-
-		do {
-			/* Reset watchdog. */
-			watchdog_periodic();
-			r = process_run();
-		} while (r > 0);
-
-		watchdog_stop();
-		/* low-power mode start */
-		asm volatile("wait");
-		/* low-power mode end */
-		watchdog_start();
+	switch (type) {
+	case SENSORS_HW_INIT:
+		TRISDSET = BIT(8);
+		TRISGSET = BIT(12) | BIT(13);
+		buttonState.all = 0;
+		return 1;
+	case SENSORS_ACTIVE:
+//		buttonState.mode = value(ButtonMode);
+		ctimer_set(&pollTimer, BUTTON_POLL_PERIOD, poll, NULL);
+		return 1;
+	default:
+		break;
 	}
-
 	return 0;
 }
 /*---------------------------------------------------------------------------*/
+SENSORS_SENSOR(button_sensor, BUTTON_SENSOR, NULL, config, NULL);
+/*---------------------------------------------------------------------------*/
 
-/** @} */
 /** @} */

@@ -46,8 +46,9 @@ endif
 
 CONTIKI_CORE_SOURCEFILES = leds.c    # sensors.c
 
-CONTIKI_TARGET_SOURCEFILES += contiki-maslow-main.c leds-arch.c leds-progress.c buzzer.c
-# battery-sensor.c button-sensor.c
+CONTIKI_TARGET_SOURCEFILES += contiki-maslow-main.c leds-arch.c \
+                              button-sensor.c leds-progress.c buzzer.c
+# battery-sensor.c
 
 CONTIKI_TARGET_SOURCEFILES += $(CONTIKI_CORE_SOURCEFILES)
 
