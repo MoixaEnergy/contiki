@@ -61,7 +61,7 @@
 #include <pic32.h>
 #include <pic32_clock.h>
 
-//#include <debug-uart.h>
+#include <debug-uart.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -104,10 +104,10 @@ main(int argc, char **argv)
 
 	clock_init();
 
-//	dbg_setup_uart(UART_DEBUG_BAUDRATE);
+	dbg_setup_uart(UART_DEBUG_BAUDRATE);
 
-//	PRINTF("CPU Clock: %uMhz\n", pic32_clock_get_system_clock() / 1000000);
-//	PRINTF("Peripheral Clock: %uMhz\n", pic32_clock_get_peripheral_clock() / 1000000);
+	PRINTF("CPU Clock: %uMhz\n", pic32_clock_get_system_clock() / 1000000);
+	PRINTF("Peripheral Clock: %uMhz\n", pic32_clock_get_peripheral_clock() / 1000000);
 
 //	random_init(4321);
 	process_init();
@@ -123,10 +123,10 @@ main(int argc, char **argv)
 //	leds_progress_set(4);
 
 	/* Starting autostarting process */
-//	print_processes(autostart_processes);
+	print_processes(autostart_processes);
 	autostart_start(autostart_processes);
 
-//	PRINTF("Processes running\n");
+	PRINTF("Processes running\n");
 
 	leds_off(LEDS_ALL);
 
