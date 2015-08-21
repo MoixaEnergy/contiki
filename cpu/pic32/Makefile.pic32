@@ -1,8 +1,7 @@
 #
-# Makefile for PIC32MX795F512L
+# Makefile for PIC32MX5xx,6xx,7xx
 # @author Giovanni Pellerano <giovanni.pellerano@evilaliv3.org>
-#
-# $Id: Makefile.pic32,v 1.0 2012/12/03 09:00:00 evilaliv3 Exp $
+# @author Moixa
 #
 
 PIC32_MODEL ?= 32MX575F512L
@@ -18,7 +17,8 @@ CONTIKI_CPU_DIRS = . lib
 
 CPU_LIBS = $(notdir $(wildcard $(CONTIKI_CPU)/lib/*.c))
 
-CONTIKI_SOURCEFILES += pic32.c clock.c watchdog.c rtimer-arch.c $(CPU_LIBS) debug-uart.c slip-uart.c
+CONTIKI_SOURCEFILES += pic32.c clock.c watchdog.c rtimer-arch.c $(CPU_LIBS) \
+                       debug-uart.c slip-uart.c
 
 ### Compiler definitions
 CC       = xc32-gcc
@@ -26,6 +26,7 @@ LD       = xc32-gcc
 AS       = xc32-as
 AR       = xc32-ar
 OBJCOPY  = xc32-objcopy
+OBJDUMP  = xc32-objdump
 STRIP    = xc32-strip
 NM       = xc32-nm
 
@@ -35,7 +36,22 @@ LDFLAGS += -mprocessor=$(PIC32_MODEL) -Wl,-Map=contiki-$(TARGET).map -s
 LDFLAGS += -Wl,--defsym,_min_stack_size=4096 -Wl,--gc-sections
 endif
 
+OBJCOPY_FLAGS += -O binary --gap-fill 0xff
+OBJDUMP_FLAGS += --disassemble --source --disassembler-options=force-thumb
+
+### CPU-dependent cleanup files
+CLEAN += symbols.c symbols.h *.d *.$(TARGET) *.hex *.bin
+
 ### Compilation rules
+
+%.hex: %.$(TARGET)
+	$(OBJCOPY) -O ihex $< $@
+
+%.bin: %.$(TARGET)
+	$(OBJCOPY) $(OBJCOPY_FLAGS) $< $@
+
+%.lst: %.$(TARGET)
+	$(OBJDUMP) $(OBJDUMP_FLAGS) $< > $@
 
 %.so: $(OBJECTDIR)/%.o
 	$(LD) -shared -o $@ $^
