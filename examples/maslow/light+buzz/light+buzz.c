@@ -127,11 +127,10 @@ PROCESS_THREAD(led_fader, ev, data)
 	pwm_init(&p, CLOCK_SECOND / 42, CLOCK_SECOND / 1050);
 
 	while (1) {
+		etimer_set(&p.on_timer, p.on_time);
 		leds_on(BIT(LedBypass));
 
-		etimer_set(&p.on_timer, p.on_time);
 		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.on_timer));
-
 		leds_off(BIT(LedBypass));
 
 		pwm_cycle(&p);
@@ -155,23 +154,16 @@ PROCESS_THREAD(buzzer, ev, data)
 	pwm_init(&p, CLOCK_SECOND / 1000, CLOCK_SECOND / 10000);
 
 	while (1) {
+		etimer_set(&p.on_timer, p.on_time);
 		buzzer_on();
 
-		etimer_set(&p.on_timer, p.on_time);
 		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.on_timer));
-
 		buzzer_off();
-
-		if (ev == PROCESS_EVENT_EXIT)
-			break;
 
 		pwm_cycle(&p);
 
 		PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&p.cycle_timer));
 		etimer_reset(&p.cycle_timer);
-
-		if (ev == PROCESS_EVENT_EXIT)
-			break;
 	}
 
 	PROCESS_END();
@@ -179,10 +171,18 @@ PROCESS_THREAD(buzzer, ev, data)
 
 PROCESS_THREAD(button_handler, ev, data)
 {
+	static uint32_t ev_data = 0;
+
 	PROCESS_BEGIN();
 
 	while (1) {
 		PROCESS_WAIT_EVENT();
+		if (data)
+			ev_data = *(uint32_t*) data;
+		else
+			ev_data = 0;
+		printf("button_handler: event %xh, data %xh\n", ev, ev_data);
+
 		switch (ev) {
 		case ButtonOverrideEvent:
 			leds_toggle(BIT(LedPV));

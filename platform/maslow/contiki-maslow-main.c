@@ -126,11 +126,9 @@ main(int argc, char **argv)
 	print_processes(autostart_processes);
 	autostart_start(autostart_processes);
 
-	PRINTF("Processes running\n");
-
 	leds_off(LEDS_ALL);
-
 	watchdog_start();
+	PRINTF("Starting the main scheduler loop\n");
 
 	/*
 	 * This is the scheduler loop.
