@@ -43,7 +43,7 @@
 #define UART_DEBUG_BAUDRATE                     115200
 
 #define PLATFORM_HAS_BATTERY                    0
-#define PLATFORM_HAS_BUTTON                     0
+#define PLATFORM_HAS_BUTTON                     1
 #define PLATFORM_HAS_LEDS                       1
 #define PLATFORM_HAS_RADIO                      0
 
