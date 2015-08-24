@@ -101,7 +101,7 @@ inline void
 pwm_init(struct pwm* p, clock_time_t cycle_time, int change_rate)
 {
 	p->change_rate = change_rate;
-	p->on_time = 1;
+	p->on_time = 0;
 	etimer_set(&p->cycle_timer, cycle_time);
 }
 
