@@ -60,13 +60,13 @@ typedef uint32_t rtimer_clock_t;
 
 #define RTIMER_CLOCK_LT(a,b) ((int32_t)((a)-(b)) < 0)
 
-#define PROFILE_CONF_ON 0
-#define ENERGEST_CONF_ON 0
-
 /* include the project config */
 /* PROJECT_CONF_H might be defined in the project Makefile */
 #ifdef PROJECT_CONF_H
-#include PROJECT_CONF_H
+  #include PROJECT_CONF_H
 #endif /* PROJECT_CONF_H */
+
+#define PROFILE_CONF_ON 0
+#define ENERGEST_CONF_ON 0
 
 #endif /* CONTIKI_CONF_H */

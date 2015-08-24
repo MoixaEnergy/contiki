@@ -1,13 +1,13 @@
 /*
  * Contiki PIC32 Port project
- * 
+ *
  * Copyright (c) 2012,
  *  Scuola Superiore Sant'Anna (http://www.sssup.it) and
  *  Consorzio Nazionale Interuniversitario per le Telecomunicazioni
  *  (http://www.cnit.it).
  *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -49,7 +49,7 @@
 
 /*
  * PIC32MX795F512L - Specific Functions
- * 
+ *
  * All the functions in this part of the file are specific for the
  * pic32mx795f512l that is characterized by registers' name that differ from
  * the 3xx and 4xx families of the pic32mx.
@@ -65,8 +65,6 @@
 #include <p32xxxx.h>
 
 #include <stdint.h>
-
-#include "dev/leds.h"
 
 #define BAUD2UBR(x)                x
 
@@ -96,29 +94,29 @@
     }                                                                    \
   }
 
-#ifdef __USE_UART_PORT1A__
-UART_PORT_DEF(1A)
-#endif /* __USE_UART_PORT1A__ */
+#ifdef __USE_UART1__
+UART_PORT_DEF(1)
+#endif /* __USE_UART1__ */
 
-#ifdef __USE_UART_PORT1B__
-UART_PORT_DEF(1B)
-#endif /* __USE_UART_PORT1B__ */
+#ifdef __USE_UART4__
+UART_PORT_DEF(4)
+#endif /* __USE_UART4__ */
 
-#ifdef __USE_UART_PORT2A__
-UART_PORT_DEF(2A)
-#endif /* __USE_UART_PORT2A__ */
+#ifdef __USE_UART3__
+UART_PORT_DEF(3)
+#endif /* __USE_UART3__ */
 
-#ifdef __USE_UART_PORT2B__
-UART_PORT_DEF(2B)
-#endif /* __USE_UART_PORT2B__ */
+#ifdef __USE_UART6__
+UART_PORT_DEF(6)
+#endif /* __USE_UART6__ */
 
-#ifdef __USE_UART_PORT3A__
-UART_PORT_DEF(3A)
-#endif /* __USE_UART_PORT3A__ */
+#ifdef __USE_UART2__
+UART_PORT_DEF(2)
+#endif /* __USE_UART2__ */
 
-#ifdef __USE_UART_PORT3B__
-UART_PORT_DEF(3B)
-#endif /* __USE_UART_PORT3B__ */
+#ifdef __USE_UART5__
+UART_PORT_DEF(5)
+#endif /* __USE_UART5__ */
 
 #endif /* __USE_UART__ */
 

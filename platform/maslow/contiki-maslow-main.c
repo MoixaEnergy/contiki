@@ -51,17 +51,19 @@
 #include <contiki.h>
 #include <clock.h>
 #include <lib/random.h>
+#include <dev/watchdog.h>
+#include <dev/serial-line.h>
+#include <pic32.h>
+#include <pic32_clock.h>
+#include <pic32_uart.h>
+#include <debug-uart.h>
 #include "dev/button-sensor.h"
 //#include "dev/battery-sensor.h"
 #include "dev/leds-arch.h"
 #include "dev/leds.h"
 #include "dev/buzzer.h"
-#include <dev/watchdog.h>
-
-#include <pic32.h>
-#include <pic32_clock.h>
-
-#include <debug-uart.h>
+#include "usb/usb-serial.h"
+#include "dev/uart.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -75,6 +77,12 @@
 #endif
 
 SENSORS(&button_sensor);
+
+#if UART_CONSOLE == 5
+UART_INTERRUPT(5 /* UART number */,
+	       2 /* IFS register number */,
+	       serial_line_input_byte /* callback */);
+#endif // UART_CONSOLE
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -103,24 +111,34 @@ main(int argc, char **argv)
 	buzzer_init();
 
 	clock_init();
-
-	dbg_setup_uart(UART_DEBUG_BAUDRATE);
-
-	PRINTF("CPU Clock: %uMhz\n", pic32_clock_get_system_clock() / 1000000);
-	PRINTF("Peripheral Clock: %uMhz\n", pic32_clock_get_peripheral_clock() / 1000000);
-
-//	random_init(4321);
-	process_init();
-	process_start(&etimer_process, NULL);
-	ctimer_init();
 	rtimer_init();
-	asm volatile("ei");  // enable interrupts
-
-	process_start(&sensors_process, NULL);
-	SENSORS_ACTIVATE(button_sensor);
+	ctimer_init();
 
 	leds_on(LEDS_ALL);
-//	leds_progress_set(4);
+
+	dbg_setup_uart(UART_BAUDRATE);
+
+#if UART_CONSOLE == 5
+	pic32_uart5_init(UART_BAUDRATE, 0);
+#endif // UART_CONSOLE
+
+//	usb_serial_init();
+//	usb_serial_set_input(serial_line_input_byte);
+
+	serial_line_init();
+
+	asm volatile("ei");  // enable interrupts
+
+	PRINTF("CPU Clock: %uMhz\n",
+	       pic32_clock_get_system_clock() / 1000000);
+	PRINTF("Peripheral Clock: %uMhz\n",
+	       pic32_clock_get_peripheral_clock() / 1000000);
+
+	random_init(4321);
+	process_init();
+	process_start(&etimer_process, NULL);
+	process_start(&sensors_process, NULL);
+	SENSORS_ACTIVATE(button_sensor);
 
 	/* Starting autostarting process */
 	print_processes(autostart_processes);

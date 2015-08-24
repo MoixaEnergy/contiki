@@ -13,12 +13,19 @@ CFLAGS += -ffunction-sections
 CONTIKI_CPU=$(CONTIKI)/cpu/pic32
 
 ### Define the cpu dirs and source files
-CONTIKI_CPU_DIRS = . lib
+CONTIKI_CPU_DIRS = . lib  ## usb
+
+### Use usb core from cpu/cc253x/usb/common
+##CONTIKI_CPU_DIRS += ../cc253x/usb/common ../cc253x/usb/common/cdc-acm
+
+##USB_CORE_SOURCEFILES += usb-core.c cdc-acm.c
+##USB_ARCH_SOURCEFILES += usb-arch.c usb-serial.c cdc-acm-descriptors.c
 
 CPU_LIBS = $(notdir $(wildcard $(CONTIKI_CPU)/lib/*.c))
 
 CONTIKI_SOURCEFILES += pic32.c clock.c watchdog.c rtimer-arch.c $(CPU_LIBS) \
                        debug-uart.c slip-uart.c
+##CONTIKI_SOURCEFILES += $(USB_CORE_SOURCEFILES) $(USB_ARCH_SOURCEFILES)
 
 ### Compiler definitions
 CC       = xc32-gcc
@@ -40,21 +47,37 @@ OBJCOPY_FLAGS += -O binary --gap-fill 0xff
 OBJDUMP_FLAGS += --disassemble --source --disassembler-options=force-thumb
 
 ### CPU-dependent cleanup files
-CLEAN += symbols.c symbols.h *.d *.$(TARGET) *.hex *.bin
+CLEAN += symbols.c symbols.h *.d *.elf *.hex *.bin
 
 ### Compilation rules
 
-%.hex: %.$(TARGET)
+### Compilation rules
+CUSTOM_RULE_LINK=1
+
+### Don't treat the .elf as intermediate
+.PRECIOUS: %.elf %.hex %.bin
+
+%.elf: %.co $(PROJECT_OBJECTFILES) $(PROJECT_LIBRARIES) contiki-$(TARGET).a
+	$(TRACE_LD)
+	$(Q)$(LD) $(LDFLAGS) ${filter-out $(LDSCRIPT) %.a,$^} ${filter %.a,$^} \
+        $(TARGET_LIBFILES) -o $@
+
+%.hex: %.elf
 	$(OBJCOPY) -O ihex $< $@
 
-%.bin: %.$(TARGET)
+%.bin: %.elf
 	$(OBJCOPY) $(OBJCOPY_FLAGS) $< $@
 
-%.lst: %.$(TARGET)
+%.lst: %.elf
 	$(OBJDUMP) $(OBJDUMP_FLAGS) $< > $@
 
 %.so: $(OBJECTDIR)/%.o
 	$(LD) -shared -o $@ $^
+
+### We don't really need the .hex and .bin for the .$(TARGET) but let's make
+### sure they get built
+%.$(TARGET): %.elf %.hex             # %.bin
+	cp $< $@
 
 ifdef CORE
 .PHONY: symbols.c symbols.h

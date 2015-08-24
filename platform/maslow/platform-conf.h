@@ -40,7 +40,8 @@
 #ifndef PLATFORM_CONF_H_
 #define PLATFORM_CONF_H_
 
-#define UART_DEBUG_BAUDRATE                     115200
+#define UART_BAUDRATE  115200
+#define UART_CONSOLE   5      /**< for communication with single-board PC */
 
 #define PLATFORM_HAS_BATTERY                    0
 #define PLATFORM_HAS_BUTTON                     1

@@ -4,6 +4,7 @@
 #include "usb-core.h"
 
 #include <stdio.h>
+#include <string.h>   // for memcpy()
 
 #ifdef DEBUG
 #define PRINTF(...) printf(__VA_ARGS__)

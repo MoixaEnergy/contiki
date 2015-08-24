@@ -79,20 +79,18 @@
                                                       \
   UART_INTERRUPT(XX, YY, pic32_uart##XX##_write);
 
-#ifdef __USE_UART_PORT1A_FOR_DEBUG__
-DEBUG_UART(1A, 0);
-#elif defined  __USE_UART_PORT1B_FOR_DEBUG__
-DEBUG_UART(1B, 2);
-#elif defined  __USE_UART_PORT2A_FOR_DEBUG__
-DEBUG_UART(2A, 1);
-#elif defined  __USE_UART_PORT2B_FOR_DEBUG__
-DEBUG_UART(2B, 2);
-#elif defined  __USE_UART_PORT3A_FOR_DEBUG__
-DEBUG_UART(3A, 1);
-#elif defined  __USE_UART_PORT3B_FOR_DEBUG__
-DEBUG_UART(3B, 2);
-#else
-DEBUG_UART(1A);
+#ifdef __USE_UART1_FOR_DEBUG__
+DEBUG_UART(1, 0);
+#elif defined  __USE_UART4_FOR_DEBUG__
+DEBUG_UART(4, 2);
+#elif defined  __USE_UART3_FOR_DEBUG__
+DEBUG_UART(3, 1);
+#elif defined  __USE_UART6_FOR_DEBUG__
+DEBUG_UART(6, 2);
+#elif defined  __USE_UART2_FOR_DEBUG__
+DEBUG_UART(2, 1);
+#elif defined  __USE_UART5_FOR_DEBUG__
+DEBUG_UART(5, 2);
 #endif
 
 #endif /* __USE_UART__*/

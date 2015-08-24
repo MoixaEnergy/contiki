@@ -7,6 +7,7 @@
 #include "string-descriptors.h"
 
 #include <stdio.h>
+#include <string.h>  // for memcpu()
 
 #ifdef DEBUG
 #define PRINTF(...) printf(__VA_ARGS__)
