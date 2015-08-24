@@ -41,7 +41,8 @@
 #define PLATFORM_CONF_H_
 
 #define UART_BAUDRATE  115200
-#define UART_CONSOLE   5      /**< for communication with single-board PC */
+
+#define UART_CONSOLE 5 /* UART number */
 
 #define PLATFORM_HAS_BATTERY                    0
 #define PLATFORM_HAS_BUTTON                     1

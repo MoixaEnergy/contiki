@@ -50,7 +50,7 @@
 #include "contiki.h"
 #include "dev/slip.h"
 
-#include <pic32_uart.h>
+#include "lib/pic32_uart.h"
 
 #define DEBUG 1
 #if DEBUG

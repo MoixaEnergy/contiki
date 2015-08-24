@@ -48,7 +48,7 @@
 
 #include <p32xxxx.h>
 
-#include <pic32_irq.h>
+#include <lib/pic32_irq.h>
 
 #define BUTTON_POLL_PERIOD  (CLOCK_SECOND / 5)
 #define BUTTON_RESET_DELAY  (CLOCK_SECOND * 8)

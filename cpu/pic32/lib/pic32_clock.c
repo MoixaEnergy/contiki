@@ -55,7 +55,7 @@
  * the 3xx and 4xx families of the pic32mx.
  */
 
-#include <pic32_clock.h>
+#include "pic32_clock.h"
 
 #include <p32xxxx.h>
 

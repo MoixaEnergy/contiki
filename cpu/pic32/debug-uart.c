@@ -47,8 +47,6 @@
  * \date   2012-03-21
  */
 
-#ifdef __USE_UART__
-
 #include <debug-uart.h>
 #include <pic32_uart.h>
 
@@ -92,7 +90,5 @@ DEBUG_UART(2, 1);
 #elif defined  __USE_UART5_FOR_DEBUG__
 DEBUG_UART(5, 2);
 #endif
-
-#endif /* __USE_UART__*/
 
 /** @} */

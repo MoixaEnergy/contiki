@@ -48,9 +48,9 @@
  * \date   2012-03-21
  */
 
-#include <pic32_clock.h>
-#include <pic32_timer.h>
-#include <pic32_irq.h>
+#include "lib/pic32_clock.h"
+#include "lib/pic32_timer.h"
+#include "lib/pic32_irq.h"
 
 #include <sys/clock.h>
 #include <sys/etimer.h>

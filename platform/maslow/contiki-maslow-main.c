@@ -49,7 +49,7 @@
  */
 
 #include <contiki.h>
-#include <clock.h>
+#include <sys/clock.h>
 #include <lib/random.h>
 #include <dev/watchdog.h>
 #include <dev/serial-line.h>
@@ -159,11 +159,13 @@ main(int argc, char **argv)
 			r = process_run();
 		} while (r > 0);
 
+#if LPM_ENABLE
 		watchdog_stop();
 		/* low-power mode start */
 		asm volatile("wait");
 		/* low-power mode end */
 		watchdog_start();
+#endif // LPM_ENABLE
 	}
 
 	return 0;

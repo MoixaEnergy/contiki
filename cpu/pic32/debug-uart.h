@@ -50,13 +50,9 @@
 #ifndef DEBUG_UART_H_
 #define DEBUG_UART_H_
 
-#include <pic32_uart.h>
-
-#ifdef __USE_UART__
+#include "lib/pic32_uart.h"
 
 void dbg_setup_uart(unsigned long ubr);
-
-#endif /* __USE_UART__ */
 
 #endif
 

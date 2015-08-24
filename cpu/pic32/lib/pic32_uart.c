@@ -58,7 +58,6 @@
 #define __UART_CODE_TEST__ 0
 
 #if __UART_CODE_TEST__
-#define __USE_UART__              1
 #define __USE_UART1__             1
 #define __USE_UART2__             1
 #define __USE_UART3__             1
@@ -66,8 +65,6 @@
 #define __USE_UART5__             1
 #define __USE_UART6__             1
 #endif /* __UART_CODE_TEST__ */
-
-#ifdef __USE_UART__
 
 #include <dev/serial-line.h>
 
@@ -159,7 +156,5 @@ UART_PORT_INIT(5, 12, 2)
 UART_PORT(6, 2)
 UART_PORT_INIT(6, 12, 2)
 #endif /* __USE_UART6__ */
-
-#endif /* __USE_UART__ */
 
 /** @} */

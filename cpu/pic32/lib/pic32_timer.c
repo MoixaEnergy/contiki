@@ -1,13 +1,13 @@
 /*
  * Contiki PIC32 Port project
- * 
+ *
  * Copyright (c) 2012,
  *  Scuola Superiore Sant'Anna (http://www.sssup.it) and
  *  Consorzio Nazionale Interuniversitario per le Telecomunicazioni
  *  (http://www.cnit.it).
  *
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -40,7 +40,7 @@
  * @{
  */
 
-/** 
+/**
  * \file   pic32_timer.c
  * \brief  TIMER interface for PIC32MX (pic32mx795f512l)
  * \author Giovanni Pellerano <giovanni.pellerano@evilaliv3.org>
@@ -49,7 +49,7 @@
 
 /*
  * PIC32MX795F512L - Specific Functions
- * 
+ *
  * All the functions in this part of the file are specific for the
  * pic32mx795f512l that is characterized by registers' name that differ from
  * the 3xx and 4xx families of the pic32mx.
@@ -58,7 +58,6 @@
 #define __TIMER_CODE_TEST__ 0
 
 #if __TIMER_CODE_TEST__
-#define __USE_TIMER__       1
 #define __USE_TIMER_1__     1
 #define __USE_TIMER_2__     1
 #define __USE_TIMER_3__     1
@@ -67,8 +66,6 @@
 #define __USE_TIMER_23__    1
 #define __USE_TIMER_45__    1
 #endif /* __TIMER_CODE_TEST__ */
-
-#ifdef __USE_TIMER__
 
 #include <pic32_timer.h>
 #include <pic32_clock.h>
@@ -277,7 +274,5 @@ TIMERN_32(2, 3, 3)
 #ifdef __USE_TIMER_45__
 TIMERN_32(4, 5, 2)
 #endif /* __USE_TIMER_45__ */
-
-#endif /* __USE_TIMER__ */
 
 /** @} */

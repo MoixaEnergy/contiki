@@ -58,9 +58,7 @@
 #ifndef INCLUDE_PIC32_UART_H_
 #define INCLUDE_PIC32_UART_H_
 
-#ifdef __USE_UART__
-
-#include <pic32_irq.h>
+#include "pic32_irq.h"
 
 #include <p32xxxx.h>
 
@@ -117,8 +115,6 @@ UART_PORT_DEF(2)
 #ifdef __USE_UART5__
 UART_PORT_DEF(5)
 #endif /* __USE_UART5__ */
-
-#endif /* __USE_UART__ */
 
 #endif /* INCLUDE_PIC32_UART_H_ */
 

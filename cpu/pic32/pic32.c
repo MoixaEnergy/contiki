@@ -56,7 +56,7 @@
  * the 3xx and 4xx families of the pic32mx.
  */
 
-#include <pic32_irq.h>
+#include "lib/pic32_irq.h"
 
 #include <p32xxxx.h>
 #include <stdint.h>
