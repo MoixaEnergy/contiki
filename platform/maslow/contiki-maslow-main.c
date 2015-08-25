@@ -57,6 +57,7 @@
 #include <pic32_clock.h>
 #include <pic32_uart.h>
 #include <debug-uart.h>
+#include <lpm.h>
 #include "dev/button-sensor.h"
 //#include "dev/battery-sensor.h"
 #include "dev/leds-arch.h"
@@ -78,6 +79,7 @@
 
 SENSORS(&button_sensor);
 
+/* Serial line init part 1/3: define the RX interrupt handler. */
 #if UART_CONSOLE == 5
 UART_INTERRUPT(5 /* UART number */,
 	       2 /* IFS register number */,
@@ -118,6 +120,7 @@ main(int argc, char **argv)
 
 	dbg_setup_uart(UART_BAUDRATE);
 
+        /* Serial line init part 2/3: set up the UART port. */
 #if UART_CONSOLE == 5
 	pic32_uart5_init(UART_BAUDRATE, 0);
 #endif // UART_CONSOLE
@@ -125,6 +128,7 @@ main(int argc, char **argv)
 //	usb_serial_init();
 //	usb_serial_set_input(serial_line_input_byte);
 
+        /* Serial line init part 3/3: start the OS process. */
 	serial_line_init();
 
 	asm volatile("ei");  // enable interrupts
@@ -159,13 +163,13 @@ main(int argc, char **argv)
 			r = process_run();
 		} while (r > 0);
 
-#if LPM_ENABLE
+#if LPM_MODE > LPM_MODE_NONE
 		watchdog_stop();
 		/* low-power mode start */
 		asm volatile("wait");
 		/* low-power mode end */
 		watchdog_start();
-#endif // LPM_ENABLE
+#endif // LPM_MODE
 	}
 
 	return 0;
