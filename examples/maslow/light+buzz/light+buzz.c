@@ -47,12 +47,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "contiki.h"
-#include "sys/rtimer.h"
-#include "dev/leds-arch.h"
-#include "dev/leds.h"
-#include "dev/buzzer.h"
-#include "dev/button-sensor.h"
+#include <contiki.h>
+#include <sys/rtimer.h>
+#include <shell.h>
+#include <serial-shell.h>
+#include <dev/leds-arch.h>
+#include <dev/leds.h>
+#include <dev/buzzer.h>
+#include <dev/button-sensor.h>
 #include <pic32_clock.h>
 
 #include <p32xxxx.h>
@@ -62,8 +64,10 @@ PROCESS(leds_progress, "Progress LEDs");
 PROCESS(led_fader, "LED fader");
 PROCESS(buzzer, "PWM buzzer");
 PROCESS(button_handler, "Button handler");
+PROCESS(maslow_shell, "Maslow Contiki shell");
 
 AUTOSTART_PROCESSES(&leds_progress, &led_fader, &button_handler);
+//		    &maslow_shell);
 
 /*
  * Progress LEDs
@@ -169,6 +173,9 @@ PROCESS_THREAD(buzzer, ev, data)
 	PROCESS_END();
 }
 
+/*
+ * Button event handler
+ */
 PROCESS_THREAD(button_handler, ev, data)
 {
 	static uint32_t ev_data = 0;
@@ -204,6 +211,24 @@ PROCESS_THREAD(button_handler, ev, data)
 			break;
 		}
 	}
+
+	PROCESS_END();
+}
+
+/*
+ * Shell
+ */
+PROCESS_THREAD(maslow_shell, ev, data)
+{
+	PROCESS_BEGIN();
+
+	serial_shell_init();
+	shell_blink_init();
+	shell_ps_init();
+	shell_reboot_init();
+	shell_power_init();
+	shell_text_init();
+	shell_time_init();
 
 	PROCESS_END();
 }

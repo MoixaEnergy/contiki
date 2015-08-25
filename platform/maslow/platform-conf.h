@@ -42,7 +42,7 @@
 
 #define UART_BAUDRATE  115200
 
-#define UART_CONSOLE 5 /* UART number */
+//#define UART_CONSOLE 3 /* UART number */
 
 #define PLATFORM_HAS_BATTERY                    0
 #define PLATFORM_HAS_BUTTON                     1
@@ -50,17 +50,5 @@
 #define PLATFORM_HAS_RADIO                      0
 
 #define CLOCK_CONF_SECOND                       10000   // 100 µs
-
-/**
- * Platform events
- *
- * \sa <process.h>
- */
-typedef enum {
-	ButtonOverrideEvent = 0,
-	ButtonResetEvent,
-	ButtonModeEvent,
-	ButtonJoinEvent
-} MaslowEvent;
 
 #endif /* PLATFORM_CONF_H_ */

@@ -53,6 +53,7 @@
 #include <lib/random.h>
 #include <dev/watchdog.h>
 #include <dev/serial-line.h>
+#include <net/linkaddr.h>
 #include <pic32.h>
 #include <pic32_clock.h>
 #include <pic32_uart.h>
@@ -64,9 +65,7 @@
 #include "dev/leds.h"
 #include "dev/buzzer.h"
 #include "usb/usb-serial.h"
-#include "dev/uart.h"
 
-#include <stdio.h>
 #include <string.h>
 
 #define DEBUG 1
@@ -77,18 +76,27 @@
   #define PRINTF(...)
 #endif
 
+linkaddr_t linkaddr_node_addr = {{0, 0, 0, 0, 0, 0}};
+
 SENSORS(&button_sensor);
 
 /* Serial line init part 1/3: define the RX interrupt handler. */
-#if UART_CONSOLE == 5
+#if UART_CONSOLE == 3
+
+UART_INTERRUPT(3 /* UART number */,
+	       1 /* IFS register number */,
+	       serial_line_input_byte /* callback */);
+
+#elif UART_CONSOLE == 5
+
 UART_INTERRUPT(5 /* UART number */,
 	       2 /* IFS register number */,
 	       serial_line_input_byte /* callback */);
+
 #endif // UART_CONSOLE
 
 /*---------------------------------------------------------------------------*/
-static void
-print_processes(struct process *const processes[])
+static void print_processes(struct process *const processes[])
 {
 	PRINTF("Starting:\n");
 
@@ -100,12 +108,11 @@ print_processes(struct process *const processes[])
 	PRINTF("\n");
 }
 
-/*---------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int32_t r;
 
+	process_init(); // run before any function that starts a process
 	pic32_init();
 	watchdog_init();
 	leds_init();
@@ -118,12 +125,10 @@ main(int argc, char **argv)
 
 	leds_on(LEDS_ALL);
 
-	dbg_setup_uart(UART_BAUDRATE);
-
         /* Serial line init part 2/3: set up the UART port. */
-#if UART_CONSOLE == 5
-	pic32_uart5_init(UART_BAUDRATE, 0);
-#endif // UART_CONSOLE
+	dbg_setup_uart(UART_BAUDRATE);
+//	pic32_uart3_init(UART_BAUDRATE, 0);
+//	pic32_uart5_init(UART_BAUDRATE, 0);
 
 //	usb_serial_init();
 //	usb_serial_set_input(serial_line_input_byte);
@@ -139,7 +144,6 @@ main(int argc, char **argv)
 	       pic32_clock_get_peripheral_clock() / 1000000);
 
 	random_init(4321);
-	process_init();
 	process_start(&etimer_process, NULL);
 	process_start(&sensors_process, NULL);
 	SENSORS_ACTIVATE(button_sensor);

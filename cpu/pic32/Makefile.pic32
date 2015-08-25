@@ -13,7 +13,7 @@ CFLAGS += -ffunction-sections
 CONTIKI_CPU=$(CONTIKI)/cpu/pic32
 
 ### Define the cpu dirs and source files
-CONTIKI_CPU_DIRS = . lib  ## usb
+CONTIKI_CPU_DIRS = . lib usb
 
 ### Use usb core from cpu/cc253x/usb/common
 ##CONTIKI_CPU_DIRS += ../cc253x/usb/common ../cc253x/usb/common/cdc-acm

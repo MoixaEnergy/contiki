@@ -69,4 +69,18 @@ typedef uint32_t rtimer_clock_t;
 #define PROFILE_CONF_ON 0
 #define ENERGEST_CONF_ON 0
 
+#define LINKADDR_CONF_SIZE 6 /* standard Maslow device ID size */
+
+/**
+- * Platform-specific process events in the user range 0-127.
+- *
+- * \sa <process.h>
+- */
+typedef enum {
+       ButtonOverrideEvent = 0,
+       ButtonResetEvent,
+       ButtonModeEvent,
+       ButtonJoinEvent
+} MaslowEvent;
+
 #endif /* CONTIKI_CONF_H */
