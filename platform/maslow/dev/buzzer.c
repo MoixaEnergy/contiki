@@ -50,26 +50,26 @@
 #include "p32xxxx.h"
 
 /*---------------------------------------------------------------------------*/
-void
+inline void
 buzzer_init(void)
 {
 	TRISDCLR = BIT(1);
 	LATDbits.LATD1 = 0;
 }
 /*---------------------------------------------------------------------------*/
-uint8_t
+inline uint8_t
 buzzer_get(void)
 {
 	return (PORTDbits.RD1 ? 1 : 0);
 }
 /*---------------------------------------------------------------------------*/
-void
+inline void
 buzzer_on(void)
 {
 	LATDbits.LATD1 = 1;
 }
 /*---------------------------------------------------------------------------*/
-void
+inline void
 buzzer_off(void)
 {
 	LATDbits.LATD1 = 0;
