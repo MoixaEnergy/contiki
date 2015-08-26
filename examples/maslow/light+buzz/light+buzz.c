@@ -178,18 +178,10 @@ PROCESS_THREAD(buzzer, ev, data)
  */
 PROCESS_THREAD(button_handler, ev, data)
 {
-	static uint32_t ev_data = 0;
-
 	PROCESS_BEGIN();
 
 	while (1) {
 		PROCESS_WAIT_EVENT();
-		if (data)
-			ev_data = *(uint32_t*) data;
-		else
-			ev_data = 0;
-		printf("button_handler: event %xh, data %xh\n", ev, ev_data);
-
 		switch (ev) {
 		case ButtonOverrideEvent:
 			leds_toggle(BIT(LedPV));
