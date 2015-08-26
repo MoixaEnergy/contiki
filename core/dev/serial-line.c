@@ -93,7 +93,6 @@ PROCESS_THREAD(serial_line_process, ev, data)
   PROCESS_BEGIN();
 
   serial_line_event_message = process_alloc_event();
-  printf("serial_line_event_message <- %d\n", serial_line_event_message);
   ptr = 0;
 
   while(1) {
