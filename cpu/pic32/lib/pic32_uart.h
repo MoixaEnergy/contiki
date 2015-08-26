@@ -92,6 +92,10 @@
     }                                                                    \
   }
 
+#ifdef UART_CONSOLE
+void uart_console_init(uint32_t ubr);
+#endif
+
 #ifdef __USE_UART1__
 UART_PORT_DEF(1)
 #endif /* __USE_UART1__ */

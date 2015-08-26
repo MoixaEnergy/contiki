@@ -80,21 +80,6 @@ linkaddr_t linkaddr_node_addr = {{0, 0, 0, 0, 0, 0}};
 
 SENSORS(&button_sensor);
 
-/* Serial line init part 1/3: define the RX interrupt handler. */
-#if UART_CONSOLE == 3
-
-UART_INTERRUPT(3 /* UART number */,
-	       1 /* IFS register number */,
-	       serial_line_input_byte /* callback */);
-
-#elif UART_CONSOLE == 5
-
-UART_INTERRUPT(5 /* UART number */,
-	       2 /* IFS register number */,
-	       serial_line_input_byte /* callback */);
-
-#endif // UART_CONSOLE
-
 /*---------------------------------------------------------------------------*/
 static void print_processes(struct process *const processes[])
 {
@@ -126,9 +111,7 @@ int main(int argc, char **argv)
 	leds_on(LEDS_ALL);
 
         /* Serial line init part 2/3: set up the UART port. */
-	dbg_setup_uart(UART_BAUDRATE);
-//	pic32_uart3_init(UART_BAUDRATE, 0);
-//	pic32_uart5_init(UART_BAUDRATE, 0);
+	uart_console_init(UART_BAUDRATE);
 
 //	usb_serial_init();
 //	usb_serial_set_input(serial_line_input_byte);

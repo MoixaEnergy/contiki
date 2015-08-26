@@ -127,34 +127,72 @@
   }
 /*---------------------------------------------------------------------------*/
 
+#define UART_CONSOLE_INIT(XX, YY)		      \
+	void _mon_putc(char c)			      \
+	{					      \
+		pic32_uart##XX##_write(c);	      \
+	}					      \
+						      \
+	void uart_console_init(uint32_t ubr)				\
+	{								\
+		pic32_uart##XX##_init(ubr, 0);				\
+		printf("Initializing UART console @ %lubps\n", ubr);	\
+	}								\
+									\
+	void serial_line_input_echo##XX##_byte(char c)			\
+	{								\
+		pic32_uart##XX##_write(c);				\
+		serial_line_input_byte(c);				\
+	}								\
+									\
+	UART_INTERRUPT(XX, YY, serial_line_input_echo##XX##_byte);
+
 #ifdef __USE_UART1__
 UART_PORT(1, 0)
 UART_PORT_INIT(1, 6, 0)
+#if UART_CONSOLE == 1
+UART_CONSOLE_INIT(1, 0)
+#endif /* UART_CONSOLE */
 #endif /* __USE_UART1__ */
 
 #ifdef __USE_UART2__
 UART_PORT(2, 1)
 UART_PORT_INIT(2, 8, 1)
+#if UART_CONSOLE == 2
+UART_CONSOLE_INIT(2, 1)
+#endif /* UART_CONSOLE */
 #endif /* __USE_UART2__ */
 
 #ifdef __USE_UART3__
 UART_PORT(3, 1)
 UART_PORT_INIT(3, 7, 1)
+#if UART_CONSOLE == 3
+UART_CONSOLE_INIT(3, 1)
+#endif /* UART_CONSOLE */
 #endif /* __USE_UART3__ */
 
 #ifdef __USE_UART4__
 UART_PORT(4, 2)
 UART_PORT_INIT(4, 12, 2)
+#if UART_CONSOLE == 4
+UART_CONSOLE_INIT(4, 2)
+#endif /* UART_CONSOLE */
 #endif /* __USE_UART4__ */
 
 #ifdef __USE_UART5__
 UART_PORT(5, 2)
 UART_PORT_INIT(5, 12, 2)
+#if UART_CONSOLE == 5
+UART_CONSOLE_INIT(5, 2)
+#endif /* UART_CONSOLE */
 #endif /* __USE_UART5__ */
 
 #ifdef __USE_UART6__
 UART_PORT(6, 2)
 UART_PORT_INIT(6, 12, 2)
+#if UART_CONSOLE == 6
+UART_CONSOLE_INIT(6, 2)
+#endif /* UART_CONSOLE */
 #endif /* __USE_UART6__ */
 
 /** @} */

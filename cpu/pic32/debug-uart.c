@@ -50,8 +50,6 @@
 #include <debug-uart.h>
 #include <pic32_uart.h>
 
-#include <dev/serial-line.h>
-
 #define DEBUG 0
 #if DEBUG
 #include <stdio.h>
@@ -75,9 +73,7 @@
     PRINTF("Initializing debug uart: %lubps\n", ubr); \
   }                                                   \
                                                       \
-  UART_INTERRUPT(XX, YY, serial_line_input_byte);
-
-// UART_INTERRUPT(XX, YY, pic32_uart##XX##_write);
+  UART_INTERRUPT(XX, YY, pic32_uart##XX##_write);
 
 #ifdef __USE_UART1_FOR_DEBUG__
 DEBUG_UART(1, 0);

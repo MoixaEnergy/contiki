@@ -66,8 +66,8 @@ PROCESS(buzzer, "PWM buzzer");
 PROCESS(button_handler, "Button handler");
 PROCESS(maslow_shell, "Maslow Contiki shell");
 
-AUTOSTART_PROCESSES(&leds_progress, &led_fader, &button_handler);
-//		    &maslow_shell);
+AUTOSTART_PROCESSES(&leds_progress, &led_fader, &button_handler,
+		    &maslow_shell);
 
 /*
  * Progress LEDs

@@ -93,7 +93,7 @@
     #pragma config UPLLEN   = ON        // USB PLL Enabled
   #endif
   #pragma config WDTPS     = PS65536    // Watchdog Timer Postscale
-  #pragma config FCKSM     = CSECME     // Clock Switching & Fail Safe Clock Monitor
+  #pragma config FCKSM     = CSDCMD     // Clock Switching & Fail Safe Clock Monitor
   #pragma config IESO      = ON         // Internal/External Switch-over
   #pragma config DEBUG     = OFF        // 4-wire JTAG and Trace disabled
   #pragma config FUSBIDIO  = OFF        // use as IO
